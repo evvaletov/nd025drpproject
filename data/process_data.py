@@ -32,12 +32,12 @@ def load_data(messages_filepath, categories_filepath):
     category_colnames = list(row.str.split("-", expand=True)[0])
     # rename the columns of `categories`
     categories.columns = category_colnames
-    # convert category values to numbers 0 or 1
+    # convert category values to binary
     for column in categories:
         # set each value to be the last character of the string
         categories[column] = categories[column].str.split("-",expand=True)[1]
         # convert column from string to numeric
-        categories[column] = categories[column].astype(int)
+        categories[column] = categories[column].astype(int).ge(0.5).astype(int)
     # drop the original categories column from `df`
     df.drop('categories', axis=1, inplace=True)
     # concatenate the original dataframe with the new `categories` dataframe
