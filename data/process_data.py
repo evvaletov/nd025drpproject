@@ -4,6 +4,16 @@ import numpy as np
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+    '''
+    Loads messages and categories data and returned the merged data in a Pandas dataframe.
+    
+        Parameters:
+            messages_filepath: path to the messages CSV file
+            categories_filepath: path to the categories CSV file
+
+        Returns:
+            df: Pandas dataframe with loaded messages and categories
+    '''
     # Load messages dataset
     messages = pd.read_csv(messages_filepath)
     messages.drop_duplicates(subset='id', inplace=True)
@@ -38,14 +48,32 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    '''
+    Cleans the data by dropping duplicate rows in the supplied Pandas dataframe.
+    
+        Parameters:
+            df: Pandas dataframe to be cleaned
+
+        Returns:
+            df: Cleaned Pandas dataframe
+    '''
     df.drop_duplicates(inplace=True)
     assert sum(df.duplicated().astype(int))==0
     return df
 
 
 def save_data(df, database_filename):
+    '''
+    Saves the Pandas dataframe with messages and categories to a SQLite database.
+    
+        Parameters:
+            df: Pandas dataframe to be saved
+            database_filename: Filename of the output SQLite database
+
+        Returns:
+            (nothing)
+    '''
     engine = create_engine("sqlite:///"+database_filename)
-    # print(df.head())
     df.to_sql('messages', engine, index=False, if_exists='replace')
     pass  
 

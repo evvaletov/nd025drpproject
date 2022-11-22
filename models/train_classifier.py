@@ -20,6 +20,16 @@ import nltk
 nltk.download(['punkt', 'wordnet', 'averaged_perceptron_tagger'])
 
 def load_data(database_filepath):
+    '''
+    Loads the SQLite database with messages and categories and returns the X and Y for machine learning model training.
+    
+        Parameters:
+            database_filename: Filename of the SQLite database
+
+        Returns:
+            X, Y: The X and Y Pandas dataframes for machine learning model training
+            Y.columns: The column names of the Y dataframe
+    '''
     engine = create_engine('sqlite:///'+database_filepath)
     df = pd.read_sql_table("messages", con=engine)
     df = df.reset_index()
@@ -29,6 +39,15 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    '''
+    Tokenizes the input text.
+    
+        Parameters:
+            text: The text to be tokenized
+
+        Return:
+            clean_tokens: Lemmatized and stripped tokens in the lower case
+    '''
     url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     detected_urls = re.findall(url_regex, text)
     for url in detected_urls:
@@ -43,6 +62,15 @@ def tokenize(text):
 
 
 def build_model():
+    '''
+    Builds a machine learning model for message classification.
+    
+        Parameters:
+            (nothing)
+
+        Returns:
+            df: The built machine learning model
+    '''
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -56,6 +84,17 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    '''
+    Prints the classification report for each message category using the trained machine learning model.
+    
+        Parameters:
+            model: The machine learning model
+            X_test, Y_test: The test X, Y dataframes for the classification report
+            category names: The message category names
+
+        Returns:
+            (nothing)
+    '''
     Y_pred = model.predict(X_test)
     for j, column in enumerate(category_names):
         print("Classification report for category \""+column+"\"")
@@ -63,6 +102,16 @@ def evaluate_model(model, X_test, Y_test, category_names):
     
 
 def save_model(model, model_filepath):
+    '''
+    Saves the trained machine learning model into a picke file.
+    
+        Parameters:
+            model: The machine learning model
+            model_filepath: The path for the saved machine learning model
+
+        Return:
+            (nothing)
+    '''
     pickle.dump(model, open(model_filepath,"wb"))
 
 

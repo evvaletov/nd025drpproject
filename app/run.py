@@ -7,14 +7,24 @@ from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
-from sklearn.externals import joblib
+from plotly.graph_objs import Bar, Pie, Scatter
+#from sklearn.externals import joblib
+import joblib
 from sqlalchemy import create_engine
 
 
 app = Flask(__name__)
 
 def tokenize(text):
+    '''
+    Tokenizes the input text.
+    
+        Parameters:
+            text: The text to be tokenized
+
+        Return:
+            clean_tokens: Lemmatized and stripped tokens in the lower case
+    '''
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
 
@@ -40,17 +50,32 @@ def index():
     
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
+    # Data for the first plot
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
+    # Data for the second plot
+    df['message_type'] = df.apply(lambda row: "aid" if row.aid_related==1 else 
+                                  ("infrastructure" if row.infrastructure_related==1 else
+                                  ("weather" if row.weather_related==1 else "other")), axis=1)
+    df['message_type'] = df.apply(lambda row: "mixed" if row.aid_related+row.infrastructure_related+row.weather_related>1 else row.message_type, axis=1)
+    message_type_counts = df.groupby('message_type').count()['message']
+    message_type_names = list(message_type_counts.index)
+    # Data for the third plot
+    aid_related_offer_counts = df[df.offer==1][['medical_help', 'medical_products', 'search_and_rescue', 'security', 'military', 'child_alone', 'water', 'food', 'shelter', 'clothing', 'money']].astype(bool).sum(axis=0)
+    aid_related_offer_names = list(aid_related_offer_counts.index)
+    aid_related_request_counts = df[df.request==1][['medical_help', 'medical_products', 'search_and_rescue', 'security', 'military', 'child_alone', 'water', 'food', 'shelter', 'clothing', 'money']].astype(bool).sum(axis=0)
+    aid_related_request_names = list(aid_related_request_counts.index)
+   
+    # Third plot specification 
     
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
         {
             'data': [
-                Bar(
-                    x=genre_names,
-                    y=genre_counts
+                Pie(
+                    labels=genre_names,
+                    values=genre_counts
                 )
             ],
 
@@ -61,6 +86,68 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=message_type_names,
+                    y=message_type_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Broad Message Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Type"
+                }
+            }
+        },
+        {
+            'data': [
+                Scatter(
+                    x=aid_related_request_counts,
+                    y=aid_related_request_names,
+                    name="Requests",
+                    mode="markers",
+                    marker=dict(
+                      color="rgba(156, 165, 196, 0.95)",
+                      line=dict(
+                        color="rgba(156, 165, 196, 1.0)",
+                        width=1,
+                      ),
+                      symbol="circle",
+                      size=16
+                    )
+                ),
+                Scatter(
+                    x=aid_related_offer_counts,
+                    y=aid_related_offer_names,
+                    name="Offers",
+                    mode="markers",
+                    marker=dict(
+		      color="rgba(204, 204, 204, 0.95)",
+		      line=dict(
+			color="rgba(217, 217, 217, 1.0)",
+			width=1,
+		      ),
+		      symbol="circle",
+		      size=16
+		    )
+                )
+            ],
+
+            'layout': {
+                'title': 'Aid related offers and requests',
+                'yaxis': {
+                    'title': "Type"
+                },
+                'xaxis': {
+                    'title': "Count"
                 }
             }
         }
