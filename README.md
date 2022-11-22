@@ -19,10 +19,10 @@ The project consists of three parts: an ETL pipeline that loads disaster-related
 
 ### Main Files:
 
-data/disaster_messages.csv: a CSV file with disaster-related messages
-data/disaster_categories.csv: a CSV file with categorisation of the messages
-data/process_data.py: a Python program to run the ETL pipeline that cleans the data and stores it in the database
-data/DisasterResponse.db: a SQLite database with the combined and cleaned message and category data
-models/train_classifier.py: a Python program that trains and saves a ML classifier for message classification
-models/classifier.pkl: the saved ML classifier produced by train_classifier.py
-app/app.py: a Flask app that shows several summary plots for the messages in the SQLite database and can classify user-giver messages
+1. `data/disaster_messages.csv`: a CSV file with disaster-related messages
+2. `data/disaster_categories.csv`: a CSV file with categorisation of the messages
+3. `data/process_data.py`: a Python program to run the ETL pipeline that cleans the data and stores it in the database
+4. `data/DisasterResponse.db`: a SQLite database with the combined and cleaned message and category data
+5. `models/train_classifier.py`: a Python program that trains and saves a ML classifier for message classification
+6. `models/classifier.pkl`: the saved ML classifier produced by `train_classifier.py`
+7. `app/app.py`: a Flask app that shows several summary plots for the messages in the SQLite database and can classify user-giver messages
